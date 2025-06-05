@@ -1,0 +1,222 @@
+You're looking for the complete problem statements and full solved code for both questions. Here they are:
+Question 1: Search a Node in Binary Search Tree (BST)
+Problem Statement:
+You are given the root node of a Binary Search Tree (BST) and an integer k. Your task is to determine if a node with the value k exists in the BST. If such a node exists, return true; otherwise, return false.
+Input Format:
+ * The first line inputs N, the number of nodes to be inserted into the BST, and K, the value of the node to find.
+ * The second line inputs N space-separated integers representing the elements to be inserted into the BST.
+Output Format:
+ * Print "YES" if the node with value K is present in the BST, otherwise print "NO".
+Constraints:
+ * 1 <= N <= 1000
+ * Node values (val) and K will be within a reasonable integer range (e.g., 0 <= val, K <= 10^4).
+Solved Code for Question 1 (Search a Node in BST):
+import java.util.*;
+import java.io.*;
+
+// Node class definition for the Binary Search Tree
+class Node {
+    int val;
+    Node left, right;
+
+    Node(int val) {
+        this.val = val;
+        left = null;
+        right = null;
+    }
+}
+
+// BST class for building and managing the Binary Search Tree
+class BST {
+    Node root = null;
+
+    BST() {
+    }
+
+    BST(Node root) {
+        this.root = root;
+    }
+
+    // Method to insert a new value into the BST.
+    // Duplicates are typically handled by either ignoring them or placing them
+    // consistently on one side (e.g., right subtree for equal values).
+    // This implementation places equal values in the right subtree.
+    Node insert(Node root, int val) {
+        if (root == null) {
+            return new Node(val);
+        }
+
+        if (val < root.val) {
+            root.left = insert(root.left, val);
+        } else { // If val is greater than or EQUAL to root.val, go right
+            root.right = insert(root.right, val);
+        }
+        return root;
+    }
+
+    // A utility method to print the tree (e.g., in-order traversal).
+    // Not directly used for the search problem's output, but often useful for debugging.
+    void print(Node root) {
+        if (root != null) {
+            System.out.print(root.val + " ");
+            print(root.left);
+            print(root.right);
+        }
+    }
+}
+
+// Solution class containing the search logic
+class Solution {
+    // Method to search for a node with value 'k' in the BST
+    public boolean searchNode(Node root, int k) {
+        // Base Case 1: If the current node is null, the value is not found in this path.
+        if (root == null) {
+            return false;
+        }
+
+        // Base Case 2: If the current node's value matches 'k', we found it.
+        if (root.val == k) {
+            return true;
+        }
+        // If 'k' is less than the current node's value, search in the left subtree.
+        else if (k < root.val) {
+            return searchNode(root.left, k);
+        }
+        // If 'k' is greater than the current node's value, search in the right subtree.
+        else { // k > root.val
+            return searchNode(root.right, k);
+        }
+    }
+}
+
+// Main class to handle input/output and run the solution
+public class Main {
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+
+        // Read N (number of nodes) and K (value to search)
+        int n = input.nextInt();
+        int k = input.nextInt();
+
+        BST t = new BST(); // Create a new Binary Search Tree
+
+        // Insert N elements into the BST
+        for (int i = 0; i < n; i++) {
+            t.root = t.insert(t.root, input.nextInt());
+        }
+
+        Solution obj = new Solution(); // Create an instance of the Solution class
+        boolean result = obj.searchNode(t.root, k); // Call the search method
+
+        // Print the result based on whether the node was found
+        if (result) {
+            System.out.println("YES");
+        } else {
+            System.out.println("NO");
+        }
+
+        input.close(); // Close the scanner
+    }
+}
+
+Question 2: Longest Mountain Subarray
+Problem Statement:
+You are given an integer array arr of size N. Your task is to find the length of the longest subarray subarr that satisfies the following conditions:
+ * The length of subarr is at least 3.
+ * There exists an index i within subarr (excluding the first and last elements) such that:
+   * subarr[0] < subarr[1] < ... < subarr[i-1] < subarr[i] (strictly increasing part leading to a peak)
+   * subarr[i] > subarr[i+1] > ... > subarr[subarr.length - 1] (strictly decreasing part from the peak)
+   * Essentially, the subarray must strictly increase to a peak and then strictly decrease.
+ * If no such "mountain" subarray exists, return 0.
+Input Format:
+ * The first line of input contains a single integer n, representing the length of the array.
+ * The second line contains n space-separated integers, denoting the elements of the given array arr.
+Output Format:
+ * Print the length of the longest subarray that has the shape of a mountain.
+Constraints:
+ * 1 <= n <= 10^4
+ * 0 <= arr[i] <= 10^4
+Solved Code for Question 2 (Longest Mountain Subarray):
+import java.util.*; // Required for Scanner and Math.max
+
+class Solution {
+    public int longestMountainSubarray(int[] arr) {
+        int n = arr.length;
+
+        // A mountain must have at least 3 elements (one for uphill, one for peak, one for downhill)
+        if (n < 3) {
+            return 0;
+        }
+
+        int maxLen = 0; // Stores the maximum length of a mountain found so far
+
+        // Iterate through the array to find potential peaks.
+        // A peak cannot be the first element (index 0) because it needs an uphill slope before it.
+        // A peak cannot be the last element (index n-1) because it needs a downhill slope after it.
+        // So, 'i' (potential peak index) goes from 1 to n-2.
+        for (int i = 1; i < n - 1; ) { // 'i++' is handled inside the loop for optimization
+            // Check if arr[i] is a peak: it must be strictly greater than both its immediate neighbors
+            if (arr[i] > arr[i-1] && arr[i] > arr[i+1]) {
+                // If it's a peak, we have found the potential start of a mountain.
+                // Now, expand outwards from this peak to find the full mountain's boundaries.
+
+                // Expand left (uphill part):
+                int left = i - 1; // Start 'left' pointer from the element just before the peak
+                // Move 'left' to the left as long as elements are strictly increasing
+                // (i.e., current element is greater than its left neighbor)
+                while (left > 0 && arr[left] > arr[left-1]) {
+                    left--;
+                }
+
+                // Expand right (downhill part):
+                int right = i + 1; // Start 'right' pointer from the element just after the peak
+                // Move 'right' to the right as long as elements are strictly decreasing
+                // (i.e., current element is greater than its right neighbor)
+                while (right < n - 1 && arr[right] > arr[right+1]) {
+                    right++;
+                }
+
+                // Calculate the length of the current mountain.
+                // The mountain spans from 'left' index to 'right' index, inclusive.
+                int currentLength = right - left + 1;
+                
+                // Update the overall maximum length found so far
+                maxLen = Math.max(maxLen, currentLength);
+
+                // Optimization:
+                // Since we've processed the elements from 'left' to 'right' as part of this mountain,
+                // we can safely jump our main loop iterator 'i' to the 'right' pointer's current position.
+                // This prevents redundant checks within the current mountain and speeds up the process.
+                i = right;
+            } else {
+                // If arr[i] is not a peak (e.g., it's flat, or part of a purely increasing/decreasing sequence),
+                // we simply move to the next element to check for a new potential peak.
+                i++;
+            }
+        }
+        return maxLen; // Return the maximum length found
+    }
+}
+
+// Main class to handle input/output and run the solution
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt(); // Read the size of the array
+        int[] arr = new int[n]; // Declare the array
+
+        // Read the elements of the array
+        for (int i = 0; i < n; i++) {
+            arr[i] = sc.nextInt();
+        }
+
+        Solution Obj = new Solution(); // Create an instance of the Solution class
+        int res = Obj.longestMountainSubarray(arr); // Call the longestMountainSubarray method
+        
+        System.out.println(res); // Print the result
+        sc.close(); // Close the scanner
+    }
+}
+
+
+
